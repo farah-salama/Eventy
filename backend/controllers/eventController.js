@@ -24,7 +24,7 @@ const createEvent = async (req, res) => {
 // @access  Public
 const getEvents = async (req, res) => {
   try {
-    const { search } = req.query;
+    const { search, page = 1, limit = 9 } = req.query;
     let query = {};
 
     if (search) {
@@ -37,8 +37,24 @@ const getEvents = async (req, res) => {
       };
     }
 
-    const events = await Event.find(query).sort('-createdAt');
-    res.json(events);
+    // Calculate skip value for pagination
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+
+    // Get total count for pagination
+    const total = await Event.countDocuments(query);
+
+    // Get paginated events
+    const events = await Event.find(query)
+      .sort('-createdAt')
+      .skip(skip)
+      .limit(parseInt(limit));
+
+    res.json({
+      events,
+      currentPage: parseInt(page),
+      totalPages: Math.ceil(total / parseInt(limit)),
+      totalEvents: total
+    });
   } catch (error) {
     res.status(500).json({ message: 'Server error' });
   }
