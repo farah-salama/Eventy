@@ -77,9 +77,11 @@ const AdminPanel = () => {
   const fetchEvents = async () => {
     try {
       const res = await axios.get(`${API_URL}/api/events`);
-      setEvents(res.data);
+      // The API returns events in a nested structure with pagination info
+      setEvents(res.data.events || []);
     } catch (error) {
       console.error('Error fetching events:', error);
+      setEvents([]); // Set empty array on error
     }
   };
 
@@ -228,6 +230,10 @@ const AdminPanel = () => {
   };
 
   const getFilteredAndSortedEvents = () => {
+    if (!Array.isArray(events)) {
+      return [];
+    }
+    
     let filteredEvents = [...events];
     
     // Apply category filter
