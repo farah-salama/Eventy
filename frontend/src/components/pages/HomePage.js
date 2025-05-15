@@ -207,13 +207,13 @@ const HomePage = () => {
                     {event.name}
                   </Typography>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 4 }}>
-                    <Typography sx={{ color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: 1.5, fontSize: '1.2rem' }}>
+                    <Typography sx={{ color: '#fff', display: 'flex', alignItems: 'center', gap: 1.5, fontSize: '1.2rem' }}>
                       <CalendarToday sx={{ color: accent, fontSize: '1.5rem' }} /> {formatDate(event.date)}
                     </Typography>
-                    <Typography sx={{ color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: 1.5, fontSize: '1.2rem' }}>
+                    <Typography sx={{ color: '#fff', display: 'flex', alignItems: 'center', gap: 1.5, fontSize: '1.2rem' }}>
                       <LocationOn sx={{ color: accent, fontSize: '1.5rem' }} /> {event.venue}
                     </Typography>
-                    <Typography sx={{ color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: 1.5, fontSize: '1.2rem' }}>
+                    <Typography sx={{ color: '#fff', display: 'flex', alignItems: 'center', gap: 1.5, fontSize: '1.2rem' }}>
                       <AttachMoney sx={{ color: accent, fontSize: '1.5rem' }} /> {event.price}
                     </Typography>
                   </Box>

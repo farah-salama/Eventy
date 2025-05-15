@@ -130,7 +130,30 @@ const Login = () => {
               required
               error={!!fieldErrors.email}
               helperText={fieldErrors.email}
-              sx={{ background: '#f6f6fa', borderRadius: 2 }}
+              sx={{
+                background: 'var(--background-secondary)',
+                borderRadius: 2,
+                '& .MuiInputBase-input': {
+                  color: 'var(--text-primary)',
+                },
+                '& .MuiInputLabel-root': {
+                  color: 'var(--text-secondary)',
+                },
+                '& .MuiInputLabel-root.Mui-focused': {
+                  color: accent,
+                },
+                '& .MuiOutlinedInput-root': {
+                  '& fieldset': {
+                    borderColor: 'var(--border-color)',
+                  },
+                  '&:hover fieldset': {
+                    borderColor: accent,
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: accent,
+                  },
+                },
+              }}
             />
             <TextField
               fullWidth
@@ -143,7 +166,30 @@ const Login = () => {
               required
               error={!!fieldErrors.password}
               helperText={fieldErrors.password}
-              sx={{ background: '#f6f6fa', borderRadius: 2 }}
+              sx={{
+                background: 'var(--background-secondary)',
+                borderRadius: 2,
+                '& .MuiInputBase-input': {
+                  color: 'var(--text-primary)',
+                },
+                '& .MuiInputLabel-root': {
+                  color: 'var(--text-secondary)',
+                },
+                '& .MuiInputLabel-root.Mui-focused': {
+                  color: accent,
+                },
+                '& .MuiOutlinedInput-root': {
+                  '& fieldset': {
+                    borderColor: 'var(--border-color)',
+                  },
+                  '&:hover fieldset': {
+                    borderColor: accent,
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: accent,
+                  },
+                },
+              }}
             />
             <EventyButton type="submit" fullWidth sx={{ mt: 3 }}>Login</EventyButton>
           </form>
