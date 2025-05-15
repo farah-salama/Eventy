@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link as RouterLink, useNavigate, useLocation } from 'react-router-dom';
 import {
   AppBar,
   Toolbar,
@@ -25,9 +25,17 @@ const Navbar = () => {
   const { isAuthenticated, isAdmin, logout, user } = useAuth();
   const { isDarkMode, toggleTheme } = useTheme();
   const navigate = useNavigate();
+  const location = useLocation();
   const [anchorEl, setAnchorEl] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const open = Boolean(anchorEl);
+
+  // Clear search when navigating away from search page
+  useEffect(() => {
+    if (!location.pathname.includes('/events')) {
+      setSearchQuery('');
+    }
+  }, [location.pathname]);
 
   const handleMenu = (event) => {
     setAnchorEl(event.currentTarget);
