@@ -9,29 +9,25 @@ The project is divided into two main parts:
 - `frontend/` - React.js frontend application
 - `backend/` - Node.js/Express.js backend server
 
-## Quick Start
+## Setup
 
-1. Clone the repository
-2. Set up the backend:
-   ```bash
-   cd backend
-   npm install
-   # Create .env file with MongoDB URI
-   npm run dev
-   ```
-3. Set up the frontend:
-   ```bash
-   cd frontend
-   npm install
-   # Create .env file with API URL
-   npm start
-   ```
+For detailed setup instructions, please refer to:
+- [Backend Documentation](./backend/README.md) - For backend server setup
+- [Frontend Documentation](./frontend/README.md) - For frontend application setup
 
-## Documentation
+## Live Demo
 
-For detailed documentation, please refer to:
-- [Backend Documentation](./backend/README.md)
-- [Frontend Documentation](./frontend/README.md)
+- Backend API: https://eventy-backend-22e620254cab.herokuapp.com
+- Frontend: [Not deployed yet]
+
+## Features
+
+- User authentication and authorization
+- Event browsing and searching
+- Event booking system
+- Admin panel for event management
+- Responsive design for all devices
+- Real-time booking confirmations
 
 ## Creating an Admin User
 
@@ -54,20 +50,6 @@ To create an admin user for the application:
 This will create an admin user with the following credentials:
 - Email: admin@eventy.com
 - Password: admin123
-
-## Live Demo
-
-- Backend API: https://eventy-backend-22e620254cab.herokuapp.com
-- Frontend: [Not deployed yet]
-
-## Features
-
-- User authentication and authorization
-- Event browsing and searching
-- Event booking system
-- Admin panel for event management
-- Responsive design for all devices
-- Real-time booking confirmations
 
 ## Technologies
 
