@@ -27,6 +27,34 @@ The project is divided into two main parts:
    npm start
    ```
 
+## Documentation
+
+For detailed documentation, please refer to:
+- [Backend Documentation](./backend/README.md)
+- [Frontend Documentation](./frontend/README.md)
+
+## Creating an Admin User
+
+To create an admin user for the application:
+
+1. Navigate to the backend directory:
+   ```bash
+   cd backend
+   ```
+
+2. (Optional) Edit the `scripts/createAdmin.js` file to change the default admin credentials:
+   - Email: admin@eventy.com
+   - Password: admin123
+
+3. Run the admin creation script:
+   ```bash
+   node scripts/createAdmin.js
+   ```
+
+This will create an admin user with the following credentials:
+- Email: admin@eventy.com
+- Password: admin123
+
 ## Live Demo
 
 - Backend API: https://eventy-backend-22e620254cab.herokuapp.com
@@ -40,12 +68,6 @@ The project is divided into two main parts:
 - Admin panel for event management
 - Responsive design for all devices
 - Real-time booking confirmations
-
-## Documentation
-
-For detailed documentation, please refer to:
-- [Backend Documentation](./backend/README.md)
-- [Frontend Documentation](./frontend/README.md)
 
 ## Technologies
 
