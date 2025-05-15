@@ -18,6 +18,7 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  Pagination,
 } from '@mui/material';
 import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
@@ -112,6 +113,9 @@ const EventsList = () => {
   const [bookedEvents, setBookedEvents] = useState([]);
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [sortBy, setSortBy] = useState('date_desc');
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalEvents, setTotalEvents] = useState(0);
   const { isAuthenticated, loading: authLoading, isAdmin } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -129,13 +133,16 @@ const EventsList = () => {
         const searchParams = new URLSearchParams(location.search);
         const searchQuery = searchParams.get('search');
         
-        let url = `${API_URL}/api/events`;
+        let url = `${API_URL}/api/events?page=${page}`;
         if (searchQuery) {
-          url += `?search=${encodeURIComponent(searchQuery)}`;
+          url += `&search=${encodeURIComponent(searchQuery)}`;
         }
         
         const res = await axios.get(url);
-        setEvents(res.data);
+        setEvents(res.data.events);
+        setTotalPages(res.data.totalPages);
+        setTotalEvents(res.data.totalEvents);
+        console.log('Fetched events:', res.data.events);
       } catch (error) {
         console.error('Error fetching events:', error);
       }
@@ -165,7 +172,7 @@ const EventsList = () => {
     if (!authLoading) {
       loadData();
     }
-  }, [isAuthenticated, authLoading, location.search]);
+  }, [isAuthenticated, authLoading, location.search, page]);
 
   useEffect(() => {
     if (bookingSuccess && !confettiFired.current) {
@@ -217,6 +224,10 @@ const EventsList = () => {
   };
 
   const getFilteredAndSortedEvents = () => {
+    if (!Array.isArray(events)) {
+      return [];
+    }
+    
     let filteredEvents = [...events];
     
     if (selectedCategories.length > 0) {
@@ -347,121 +358,152 @@ const EventsList = () => {
         </Box>
 
         <Grid container spacing={4}>
-          {getFilteredAndSortedEvents().map((event) => (
-            <Grid item xs={12} sm={6} md={4} key={event._id}>
-              <Card
-                sx={{
-                  height: '100%',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  background: cardBg,
-                  borderRadius: '24px',
-                  boxShadow: cardShadow,
-                  transition: 'transform 0.2s',
-                  '&:hover': {
-                    transform: 'translateY(-4px)',
-                  },
-                }}
-              >
-                <CardMedia
-                  component="img"
-                  height="200"
-                  image={getImageUrl(event.image) || 'https://via.placeholder.com/400x200'}
-                  alt={event.name}
-                  sx={{ borderTopLeftRadius: '24px', borderTopRightRadius: '24px' }}
-                />
-                <CardContent sx={{ flexGrow: 1, p: 3, display: 'flex', flexDirection: 'column' }}>
-                  <Box sx={{ mb: 2 }}>
-                    {(Array.isArray(event.category) ? event.category : [event.category]).map((cat) => (
-                      <Chip
-                        key={cat}
-                        label={cat}
-                        size="small"
-                        sx={{
-                          background: accent,
-                          color: '#fff',
-                          mr: 1,
-                          mb: 1,
-                          fontSize: '0.75rem',
-                        }}
-                      />
-                    ))}
-                  </Box>
-                  <Typography variant="h6" component="h2" sx={{ color: 'var(--text-primary)', fontWeight: 700, mb: 1 }}>
-                    {event.name}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                    {event.description.length > 100
-                      ? `${event.description.substring(0, 100)}...`
-                      : event.description}
-                  </Typography>
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 2 }}>
-                    <Typography variant="body2" sx={{ color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <CalendarToday sx={{ color: accent, fontSize: '1rem' }} />
-                      {formatDate(event.date)}
-                    </Typography>
-                    <Typography variant="body2" sx={{ color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <LocationOn sx={{ color: accent, fontSize: '1rem' }} />
-                      {event.venue}
-                    </Typography>
-                    <Typography variant="body2" sx={{ color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <AttachMoney sx={{ color: accent, fontSize: '1rem' }} />
-                      {event.price}
-                    </Typography>
-                  </Box>
-                  <Box sx={{ display: 'flex', gap: 1, mt: 'auto' }}>
-                    <EventyButton
-                      onClick={() => handleViewDetails(event._id)}
-                      sx={{
-                        flex: 1,
-                        px: 1.5,
-                        py: 1.5,
-                        fontSize: '1rem',
-                        minHeight: 36,
-                        background: 'transparent',
-                        color: accent,
-                        boxShadow: 'none',
-                        border: `1.5px solid ${accent}`,
-                        transition: 'background 0.2s, color 0.2s',
-                        '&:hover': {
-                          background: accent,
-                          color: '#fff',
-                          boxShadow: 'none',
-                        },
-                      }}
-                    >
-                      View Details
-                    </EventyButton>
-                    {!isAdmin && (
-                      new Date(event.date) < new Date() ? (
-                        <EventyButton
-                          sx={{ flex: 1, background: gray, color: '#fff', cursor: 'not-allowed', opacity: 0.7, px: 1.5, py: 1.5, fontSize: '1rem', minHeight: 36 }}
-                          disabled
-                        >
-                          Ended
-                        </EventyButton>
-                      ) : bookedEvents.includes(event._id) ? (
-                        <EventyButton
-                          sx={{ flex: 1, background: accent, color: '#fff', cursor: 'not-allowed', opacity: 0.7, px: 1.5, py: 1.5, fontSize: '1rem', minHeight: 36 }}
-                          disabled
-                        >
-                          Booked
-                        </EventyButton>
-                      ) : (
-                        <EventyButton
-                          onClick={() => handleBookNow(event._id)}
-                          sx={{ flex: 1, background: '#23272f', '&:hover': { background: '#181b20' }, px: 1.5, py: 1.5, fontSize: '1rem', minHeight: 36 }}
-                        >
-                          Book Now
-                        </EventyButton>
-                      )
-                    )}
-                  </Box>
-                </CardContent>
-              </Card>
+          {getFilteredAndSortedEvents().length === 0 ? (
+            <Grid item xs={12}>
+              <Typography align="center" sx={{ color: 'var(--text-secondary)', mt: 4, fontSize: '1.2rem' }}>
+                No events found.
+              </Typography>
             </Grid>
-          ))}
+          ) : (
+            getFilteredAndSortedEvents().map((event) => (
+              <Grid item xs={12} sm={6} md={4} key={event._id}>
+                <Card
+                  sx={{
+                    height: '100%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    background: cardBg,
+                    borderRadius: '24px',
+                    boxShadow: cardShadow,
+                    transition: 'transform 0.2s',
+                    '&:hover': {
+                      transform: 'translateY(-4px)',
+                    },
+                  }}
+                >
+                  <CardMedia
+                    component="img"
+                    height="200"
+                    image={getImageUrl(event.image) || 'https://via.placeholder.com/400x200'}
+                    alt={event.name}
+                    sx={{ borderTopLeftRadius: '24px', borderTopRightRadius: '24px' }}
+                  />
+                  <CardContent sx={{ flexGrow: 1, p: 3, display: 'flex', flexDirection: 'column' }}>
+                    <Box sx={{ mb: 2 }}>
+                      {(Array.isArray(event.category) ? event.category : [event.category]).map((cat) => (
+                        <Chip
+                          key={cat}
+                          label={cat}
+                          size="small"
+                          sx={{
+                            background: accent,
+                            color: '#fff',
+                            mr: 1,
+                            mb: 1,
+                            fontSize: '0.75rem',
+                          }}
+                        />
+                      ))}
+                    </Box>
+                    <Typography variant="h6" component="h2" sx={{ color: 'var(--text-primary)', fontWeight: 700, mb: 1 }}>
+                      {event.name}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                      {event.description.length > 100
+                        ? `${event.description.substring(0, 100)}...`
+                        : event.description}
+                    </Typography>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 2 }}>
+                      <Typography variant="body2" sx={{ color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <CalendarToday sx={{ color: accent, fontSize: '1rem' }} />
+                        {formatDate(event.date)}
+                      </Typography>
+                      <Typography variant="body2" sx={{ color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <LocationOn sx={{ color: accent, fontSize: '1rem' }} />
+                        {event.venue}
+                      </Typography>
+                      <Typography variant="body2" sx={{ color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <AttachMoney sx={{ color: accent, fontSize: '1rem' }} />
+                        {event.price}
+                      </Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', gap: 1, mt: 'auto' }}>
+                      <EventyButton
+                        onClick={() => handleViewDetails(event._id)}
+                        sx={{
+                          flex: 1,
+                          px: 1.5,
+                          py: 1.5,
+                          fontSize: '1rem',
+                          minHeight: 36,
+                          background: 'transparent',
+                          color: accent,
+                          boxShadow: 'none',
+                          border: `1.5px solid ${accent}`,
+                          transition: 'background 0.2s, color 0.2s',
+                          '&:hover': {
+                            background: accent,
+                            color: '#fff',
+                            boxShadow: 'none',
+                          },
+                        }}
+                      >
+                        View Details
+                      </EventyButton>
+                      {!isAdmin && (
+                        new Date(event.date) < new Date() ? (
+                          <EventyButton
+                            sx={{ flex: 1, background: gray, color: '#fff', cursor: 'not-allowed', opacity: 0.7, px: 1.5, py: 1.5, fontSize: '1rem', minHeight: 36 }}
+                            disabled
+                          >
+                            Ended
+                          </EventyButton>
+                        ) : bookedEvents.includes(event._id) ? (
+                          <EventyButton
+                            sx={{ flex: 1, background: accent, color: '#fff', cursor: 'not-allowed', opacity: 0.7, px: 1.5, py: 1.5, fontSize: '1rem', minHeight: 36 }}
+                            disabled
+                          >
+                            Booked
+                          </EventyButton>
+                        ) : (
+                          <EventyButton
+                            onClick={() => handleBookNow(event._id)}
+                            sx={{ flex: 1, background: '#23272f', '&:hover': { background: '#181b20' }, px: 1.5, py: 1.5, fontSize: '1rem', minHeight: 36 }}
+                          >
+                            Book Now
+                          </EventyButton>
+                        )
+                      )}
+                    </Box>
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))
+          )}
         </Grid>
+
+        {/* Pagination */}
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+          <Pagination
+            count={totalPages}
+            page={page}
+            onChange={(e, value) => setPage(value)}
+            color="primary"
+            size="large"
+            sx={{
+              '& .MuiPaginationItem-root': {
+                color: 'var(--text-primary)',
+                '&.Mui-selected': {
+                  background: accent,
+                  color: '#fff',
+                  '&:hover': {
+                    background: dark,
+                  },
+                },
+              },
+            }}
+          />
+        </Box>
       </Container>
 
       {/* Booking Confirmation Dialog */}
