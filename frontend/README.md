@@ -27,6 +27,8 @@ npm install
 REACT_APP_API_URL=https://eventy-backend-22e620254cab.herokuapp.com
 ```
 
+You can use `.env.example` as a reference for the required environment variables.
+
 3. Start the development server:
 ```bash
 npm start
