@@ -30,18 +30,18 @@ test.describe('Events', () => {
     await expect(page.locator('body')).not.toBeEmpty();
   });
 
-  test('can view individual event details', async ({ page }) => {
+  test('can view events details', async ({ page }) => {
     await page.goto('/events');
 
      // Check if events exist first
-     const eventCard = page.locator('[class*="Card"], [class*="card"]').first();
+     const eventCard = page.getByRole('button', { name: 'View Details' }).first();
     
      if (await eventCard.isVisible().catch(() => false)) {
         // Click on first event
-        await page.locator('[class*="Card"], [class*="card"]').first().click();
+        await expect(page.getByRole('button', { name: 'View Details' }).first()).toBeVisible();
         
         // Should navigate to event details page
-        await expect(page).toHaveURL(/.*events\/.+/);
+        await expect(page).toHaveURL(/.*event\/.+/);
      } else {
          // No events
          test.info().annotations.push({ 

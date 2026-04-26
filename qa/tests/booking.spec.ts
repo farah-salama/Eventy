@@ -1,17 +1,8 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures';
 
 test.describe.configure({ mode: 'serial' });
 
 test.describe('Booking', () => {
-
-  // Helper to login before booking tests
-  async function loginAsUser(page) {
-    await page.goto('/login');
-    await page.fill('input[name="email"]', 'new@eventy.com');
-    await page.fill('input[name="password"]', 'newAcc123');
-    await page.click('button[type="submit"]');
-    await expect(page).not.toHaveURL(/.*login/);
-  }
 
   // ==================== UNAUTHENTICATED ====================
 
@@ -34,43 +25,36 @@ test.describe('Booking', () => {
 
   // ==================== AUTHENTICATED BOOKING ====================
 
-  test('authenticated user can view event details', async ({ page }) => {
-    await loginAsUser(page);
-    
-    await page.goto('/events');
-    await page.getByRole('button', { name: 'View Details' }).first().click();
+  test('authenticated user can view event details', async ({ authenticatedPage }) => {    
+    await authenticatedPage.goto('/events');
+    await authenticatedPage.getByRole('button', { name: 'View Details' }).first().click();
 
     // Should show success message
-    await expect(page).toHaveURL(/event/);
+    await expect(authenticatedPage).toHaveURL(/event/);
   });
 
-  test('authenticated user can book event', async ({ page }) => {
-    await loginAsUser(page);
-    
-    await page.goto('/events');
-    await page.getByRole('button', { name: 'Book Now' }).first().click();
-    await page.getByRole('button', { name: 'Confirm' }).click();
+  test('authenticated user can book event', async ({ authenticatedPage }) => {    
+    await authenticatedPage.goto('/events');
+    await authenticatedPage.getByRole('button', { name: 'Book Now' }).first().click();
+    await authenticatedPage.getByRole('button', { name: 'Confirm' }).click();
 
     // Should show success message
-    await expect(page.getByRole('heading', { name: 'Booking Successful!' })).toBeVisible();
+    await expect(authenticatedPage.getByRole('heading', { name: 'Booking Successful!' })).toBeVisible();
   });
 
-  test('user can view their bookings', async ({ page }) => {
-    await loginAsUser(page);
-    
-    await page.goto('/booked-events');
+  test('user can view their bookings', async ({ authenticatedPage }) => {    
+    await authenticatedPage.goto('/booked-events');
     
     // Should show bookings page
-    await expect(page).toHaveURL(/.*booked/);
-    await expect(page.getByText('confirmed')).toBeVisible();
+    await expect(authenticatedPage).toHaveURL(/.*booked/);
+    await expect(authenticatedPage.getByText('confirmed')).toBeVisible();
   });
 
-  test('user can cancel a booking', async ({ page }) => {
-    await loginAsUser(page);
-    await page.goto('/booked-events');
+  test('user can cancel a booking', async ({ authenticatedPage }) => {
+    await authenticatedPage.goto('/booked-events');
     
     // Set up dialog handler BEFORE triggering it
-    page.on('dialog', async dialog => {
+    authenticatedPage.on('dialog', async dialog => {
       expect(dialog.type()).toBe('confirm'); // or 'alert'
       expect(dialog.message()).toContain('cancel'); // Check message
       await dialog.accept(); // Click "OK" / "Yes"
@@ -78,11 +62,11 @@ test.describe('Booking', () => {
     });
     
     // Now click the cancel button
-    const cancelButton = page.getByRole('button', { name: /cancel/i }).first();
+    const cancelButton = authenticatedPage.getByRole('button', { name: /cancel/i }).first();
     await cancelButton.click();
     
     // Verify booking was cancelled
-    await expect(page.getByText(/cancelled/i).first()).toBeVisible();
+    await expect(authenticatedPage.getByText(/cancelled/i).first()).toBeVisible();
   });
 
 });
