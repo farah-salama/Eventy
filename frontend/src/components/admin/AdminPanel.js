@@ -367,10 +367,18 @@ const AdminPanel = () => {
                     </Typography>
                   </Box>
                   <Box>
-                    <IconButton onClick={() => handleOpen(event)} sx={{ color: accent }}>
+                    <IconButton 
+                      aria-label="Edit event"
+                      data-testid="event-edit-button"
+                      onClick={() => handleOpen(event)} sx={{ color: accent }}
+                    >
                       <EditIcon />
                     </IconButton>
-                    <IconButton onClick={() => handleDelete(event._id)} sx={{ color: '#ff7675' }}>
+                    <IconButton
+                      aria-label="Delete event"
+                      data-testid="event-delete-button"
+                      onClick={() => handleDelete(event._id)} sx={{ color: '#ff7675' }}
+                    >
                       <DeleteIcon />
                     </IconButton>
                   </Box>
