@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { protect, admin } = require('../middleware/auth');
+const { body } = require('express-validator');
 const {
   getEvents,
   createEvent,
@@ -9,6 +10,14 @@ const {
   deleteEvent
 } = require('../controllers/eventController');
 const Event = require('../models/eventModel');
+
+// Validation middleware for event creation/update
+const eventValidation = [
+  body('price')
+    .isFloat({ min: 0 }).withMessage('Price must be a non-negative number'),
+  body('capacity')
+    .isInt({ min: 1 }).withMessage('Capacity must be at least 1'),
+];
 
 // Get top booked events
 router.get('/top-booked', async (req, res) => {
@@ -43,9 +52,9 @@ router.get('/top-booked', async (req, res) => {
 
 // Use controller functions for all other routes
 router.get('/', getEvents);
-router.post('/', protect, admin, createEvent);
+router.post('/', protect, admin, eventValidation, createEvent);
 router.get('/:id', getEventById);
-router.put('/:id', protect, admin, updateEvent);
+router.put('/:id', protect, admin, eventValidation, updateEvent);
 router.delete('/:id', protect, admin, deleteEvent);
 
 module.exports = router; 

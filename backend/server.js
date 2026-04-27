@@ -28,6 +28,11 @@ app.use('/api/bookings', bookingRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// 404 handler
+app.use((req, res) => {
+  res.status(404).json({ message: 'Not found' });
+});
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
