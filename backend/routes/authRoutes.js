@@ -7,10 +7,11 @@ const { protect } = require('../middleware/auth');
 // Validation middleware
 const registerValidation = [
   body('name')
-    .notEmpty().withMessage('Name is required')
-    .isLength({ min: 2 }).withMessage('Name must be at least 2 characters long')
-    .trim()
-    .escape(),
+  .notEmpty().withMessage('Name is required')
+  .isLength({ min: 2 }).withMessage('Name must be at least 2 characters long')
+  .trim()
+  .matches(/^[\p{L}\p{N}\s'.\-]+$/u)
+  .withMessage('Name can only contain letters, numbers, spaces, apostrophes, hyphens, and periods'),
   body('email')
     .notEmpty().withMessage('Email is required')
     .isEmail().withMessage('Please enter a valid email')
