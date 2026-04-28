@@ -1,4 +1,6 @@
 import { test, expect } from './fixtures';
+import { EventsPage } from './pages/EventsPage';
+import { BookingPage } from './pages/BookingPage';
 
 test.describe.configure({ mode: 'serial' });
 
@@ -7,66 +9,50 @@ test.describe('Booking', () => {
   // ==================== UNAUTHENTICATED ====================
 
   test('unauthenticated user cannot book event', async ({ page }) => {
-    await page.goto('/events');
-    
-    // Click first event
-    await page.getByRole('button', { name: 'Book Now' }).first().click();
+    const eventsPage = new EventsPage(page);
+    await eventsPage.goto();
+    await eventsPage.clickBookNowFirst();
     await expect(page).toHaveURL(/login/);
   });
   
   test('unauthenticated user cannot view event details', async ({ page }) => {
-    await page.goto('/events');
-    
-    // Click first event
-    await page.getByRole('button', { name: 'View Details' }).first().click();
-    // await expect(page).toHaveURL(/.*events\/.+/);
+    const eventsPage = new EventsPage(page);
+    await eventsPage.goto();
+    await eventsPage.clickViewDetailsFirst();
     await expect(page).toHaveURL(/login/);
   });
 
   // ==================== AUTHENTICATED BOOKING ====================
 
-  test('authenticated user can view event details', async ({ authenticatedPage }) => {    
-    await authenticatedPage.goto('/events');
-    await authenticatedPage.getByRole('button', { name: 'View Details' }).first().click();
-
-    // Should show success message
+  test('authenticated user can view event details', async ({ authenticatedPage }) => {
+    const eventsPage = new EventsPage(authenticatedPage);
+    await eventsPage.goto();
+    await eventsPage.clickViewDetailsFirst();
     await expect(authenticatedPage).toHaveURL(/event/);
   });
 
-  test('authenticated user can book event', async ({ authenticatedPage }) => {    
-    await authenticatedPage.goto('/events');
-    await authenticatedPage.getByRole('button', { name: 'Book Now' }).first().click();
-    await authenticatedPage.getByRole('button', { name: 'Confirm' }).click();
-
-    // Should show success message
-    await expect(authenticatedPage.getByRole('heading', { name: 'Booking Successful!' })).toBeVisible();
+  test('authenticated user can book event', async ({ authenticatedPage }) => {
+    const eventsPage = new EventsPage(authenticatedPage);
+    const bookingPage = new BookingPage(authenticatedPage);
+    
+    await eventsPage.goto();
+    await eventsPage.clickBookNowFirst();
+    await bookingPage.clickConfirm();
+    await bookingPage.expectBookingSuccess();
   });
 
-  test('user can view their bookings', async ({ authenticatedPage }) => {    
-    await authenticatedPage.goto('/booked-events');
-    
-    // Should show bookings page
-    await expect(authenticatedPage).toHaveURL(/.*booked/);
-    await expect(authenticatedPage.getByText('confirmed')).toBeVisible();
+  test('user can view their bookings', async ({ authenticatedPage }) => {
+    const bookingPage = new BookingPage(authenticatedPage);
+    await bookingPage.goto();
+    await bookingPage.expectOnBookingsPage();
+    await bookingPage.expectConfirmedBookingsVisible();
   });
 
   test('user can cancel a booking', async ({ authenticatedPage }) => {
-    await authenticatedPage.goto('/booked-events');
-    
-    // Set up dialog handler BEFORE triggering it
-    authenticatedPage.on('dialog', async dialog => {
-      expect(dialog.type()).toBe('confirm'); // or 'alert'
-      expect(dialog.message()).toContain('cancel'); // Check message
-      await dialog.accept(); // Click "OK" / "Yes"
-      // Or: await dialog.dismiss(); // Click "Cancel" / "No"
-    });
-    
-    // Now click the cancel button
-    const cancelButton = authenticatedPage.getByRole('button', { name: /cancel/i }).first();
-    await cancelButton.click();
-    
-    // Verify booking was cancelled
-    await expect(authenticatedPage.getByText(/cancelled/i).first()).toBeVisible();
+    const bookingPage = new BookingPage(authenticatedPage);
+    await bookingPage.goto();
+    await bookingPage.cancelFirstBooking();
+    await bookingPage.expectBookingCancelled();
   });
 
 });

@@ -1,5 +1,7 @@
 import { test, expect } from './fixtures';
 
+test.describe.configure({ mode: 'serial' });
+
 test.describe('Admin Panel', () => {
 
   // ==================== ACCESS CONTROL ====================
