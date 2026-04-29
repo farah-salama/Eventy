@@ -115,7 +115,6 @@ const EventsList = () => {
   const [sortBy, setSortBy] = useState('date_desc');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [totalEvents, setTotalEvents] = useState(0);
   const { isAuthenticated, loading: authLoading, isAdmin } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -141,7 +140,6 @@ const EventsList = () => {
         const res = await axios.get(url);
         setEvents(res.data.events);
         setTotalPages(res.data.totalPages);
-        setTotalEvents(res.data.totalEvents);
         console.log('Fetched events:', res.data.events);
       } catch (error) {
         console.error('Error fetching events:', error);

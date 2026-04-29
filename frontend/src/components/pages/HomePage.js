@@ -3,9 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import {
   Container,
   Typography,
-  Card,
-  CardContent,
-  CardMedia,
   Box,
   CircularProgress,
 } from '@mui/material';
@@ -17,7 +14,7 @@ import EventyButton from '../common/EventyButton';
 import { CalendarToday, LocationOn, AttachMoney } from '@mui/icons-material';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
-const { accent, dark, gray, cardBg, cardShadow, gradientBg } = theme;
+const { accent, dark, gray, cardShadow, gradientBg } = theme;
 
 // Helper to format date as dd/mm/yyyy
 const formatDate = (date) => {

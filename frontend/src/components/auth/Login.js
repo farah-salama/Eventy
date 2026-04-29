@@ -4,7 +4,6 @@ import {
   Container,
   Typography,
   TextField,
-  Button,
   Link,
   Box,
   Paper,
@@ -14,7 +13,7 @@ import { useAuth } from '../../context/AuthContext';
 import theme from '../theme';
 import EventyButton from '../common/EventyButton';
 
-const { accent, dark, gray, cardBg, cardShadow, gradientBg } = theme;
+const { accent, cardBg, cardShadow, gradientBg } = theme;
 
 const Login = () => {
   const [formData, setFormData] = useState({

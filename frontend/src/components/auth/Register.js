@@ -12,7 +12,7 @@ import { useAuth } from '../../context/AuthContext';
 import theme from '../theme';
 import EventyButton from '../common/EventyButton';
 
-const { accent, dark, gray, cardBg, cardShadow, gradientBg } = theme;
+const { accent, cardBg, cardShadow, gradientBg } = theme;
 
 const Register = () => {
   const [formData, setFormData] = useState({

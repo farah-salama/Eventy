@@ -4,7 +4,7 @@ import theme from '../theme';
 import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
 
-const { cardBg, cardShadow, dark, gray, gradientBg, accent } = theme;
+const { cardBg, cardShadow, gradientBg, accent } = theme;
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
 // Helper to format date as dd/mm/yyyy

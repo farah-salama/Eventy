@@ -19,7 +19,7 @@ import { useTheme } from '../../context/ThemeContext';
 import theme from '../theme';
 import EventyButton from '../common/EventyButton';
 
-const { accent, dark, cardBg, cardShadow } = theme;
+const { accent, dark, cardShadow } = theme;
 
 const Navbar = () => {
   const { isAuthenticated, isAdmin, logout, user } = useAuth();

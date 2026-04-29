@@ -7,7 +7,6 @@ import {
   Card,
   CardContent,
   CardMedia,
-  Button,
   Box,
   Chip,
   CircularProgress,
@@ -19,7 +18,7 @@ import EventyButton from '../common/EventyButton';
 import { CalendarToday, LocationOn } from '@mui/icons-material';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
-const { accent, dark, gray, cardBg, cardShadow, gradientBg } = theme;
+const { accent, dark, cardBg, cardShadow, gradientBg } = theme;
 
 // Helper to format date as dd/mm/yyyy
 const formatDate = (date) => {
@@ -69,7 +68,7 @@ const BookedEvents = () => {
   const handleCancelBooking = async (bookingId) => {
     if (window.confirm('Are you sure you want to cancel this booking?')) {
       try {
-        const res = await axios.put(`${API_URL}/api/bookings/${bookingId}/cancel`);
+        await axios.put(`${API_URL}/api/bookings/${bookingId}/cancel`);
         setBookings(bookings.map(booking => 
           booking._id === bookingId ? { ...booking, status: 'cancelled' } : booking
         ));

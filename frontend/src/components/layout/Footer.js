@@ -20,7 +20,7 @@ import {
 } from '@mui/icons-material';
 import theme from '../theme';
 
-const { accent, dark, gray, cardBg, cardShadow } = theme;
+const { accent } = theme;
 
 const Footer = () => {
   return (

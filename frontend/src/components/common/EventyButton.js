@@ -2,7 +2,7 @@ import React from 'react';
 import Button from '@mui/material/Button';
 import theme from '../theme';
 
-const { accent, dark } = theme;
+const { accent } = theme;
 
 const EventyButton = ({ children, variant = 'contained', sx = {}, ...props }) => (
   <Button

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Container,
   Typography,
@@ -25,7 +25,7 @@ import theme from '../theme';
 import EventyButton from '../common/EventyButton';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
-const { accent, dark, gray, cardBg, cardShadow, gradientBg } = theme;
+const { accent, dark, cardBg, cardShadow, gradientBg } = theme;
 
 const CATEGORIES = [
   'Arts & Entertainment',
