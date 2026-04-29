@@ -104,12 +104,52 @@ jobs:
           tail -n 80 "$GITHUB_WORKSPACE/backend-ci.log" || true
           exit 1
 
+      - name: Seed two test events via admin API
+        env:
+          PORT: ${{ env.PORT }}
+        run: |
+          set -euo pipefail
+          LOGIN_RESPONSE=$(curl -sf -X POST "http://127.0.0.1:${PORT}/api/auth/login" \
+            -H "Content-Type: application/json" \
+            -d '{"email":"admin@eventy.com","password":"admin123"}')
+          TOKEN=$(echo "$LOGIN_RESPONSE" | python3 -c "import sys, json; print(json.load(sys.stdin)['token'])")
+
+          curl -sf -X POST "http://127.0.0.1:${PORT}/api/events" \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer ${TOKEN}" \
+            -d '{
+              "name": "CI Event One",
+              "description": "Seeded event for GitHub Actions / Playwright",
+              "category": ["Arts & Entertainment"],
+              "date": "2030-06-01T12:00:00.000Z",
+              "venue": "City Arena",
+              "price": 15,
+              "capacity": 200,
+              "image": "/uploads/ci-placeholder-1.jpg"
+            }'
+
+          curl -sf -X POST "http://127.0.0.1:${PORT}/api/events" \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer ${TOKEN}" \
+            -d '{
+              "name": "CI Event Two",
+              "description": "Second seeded event for E2E and API tests",
+              "category": ["Sports & Outdoors"],
+              "date": "2030-07-15T18:30:00.000Z",
+              "venue": "Conference Center Hall B",
+              "price": 40,
+              "capacity": 150,
+              "image": "/uploads/ci-placeholder-2.jpg"
+            }'
+
+          echo "Seeded events OK"
+
       - name: Register regular test user (new@eventy.com)
         run: |
           # 201 OK; 409 if user exists from a flaky retry — both are acceptable
           reg=$(curl -s -w "\n%{http_code}" -X POST "http://127.0.0.1:${{ env.PORT }}/api/auth/register" \
             -H "Content-Type: application/json" \
-            -d '{"name":"CI Test User","email":"new@eventy.com","password":"newAcc123"}')
+            -d '{"name":"New User","email":"new@eventy.com","password":"newAcc123"}')
           echo "$reg"
           curl -sf -X POST "http://127.0.0.1:${{ env.PORT }}/api/auth/login" \
             -H "Content-Type: application/json" \
