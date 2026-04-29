@@ -21,11 +21,13 @@ permissions:
   contents: read
 
 env:
+  # Run JS-based actions on Node 24 (checkout/setup-node/upload-artifact); see GitHub deprecation of Node 20 on runners (2026).
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
   # Must match qa/tests/api/* API_URL (`http://localhost:4000/api`) → server on 4000
   PORT: '4000'
   MONGO_URI: mongodb://127.0.0.1:27017/eventy_ci
   JWT_SECRET: github-actions-ci-only-placeholder-not-production
-  NODE_VERSION: '20'
+  NODE_VERSION: '24'
 
 jobs:
   test:
