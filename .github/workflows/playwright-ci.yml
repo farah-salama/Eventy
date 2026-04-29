@@ -1,0 +1,189 @@
+# Run Playwright E2E + API tests against a real MongoDB, backend, and served frontend build.
+#
+# Prerequisites (repo owner): ensure GitHub Actions is enabled for the repository
+# (Settings → Actions → General). Requires no cloud secrets unless you migrate JWT to secrets.
+#
+# See also: qa/CI_SETUP.md and qa/README.md (ports 3000 / 4000, test users).
+
+name: Playwright CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: playwright-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  # Must match qa/tests/api/* API_URL (`http://localhost:4000/api`) → server on 4000
+  PORT: '4000'
+  MONGO_URI: mongodb://127.0.0.1:27017/eventy_ci
+  JWT_SECRET: github-actions-ci-only-placeholder-not-production
+  NODE_VERSION: '20'
+
+jobs:
+  test:
+    name: Playwright
+    runs-on: ubuntu-latest
+
+    services:
+      mongodb:
+        image: mongo:7
+        ports:
+          - 27017:27017
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: |
+            backend/package-lock.json
+            frontend/package-lock.json
+            qa/package-lock.json
+
+      - name: Wait for MongoDB to accept connections
+        run: |
+          for i in {1..60}; do
+            if bash -c "echo >/dev/tcp/127.0.0.1/27017" 2>/dev/null; then
+              echo "MongoDB is up"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "MongoDB did not become ready in time"
+          exit 1
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: npm ci
+
+      - name: Ensure uploads directory exists
+        working-directory: backend
+        run: mkdir -p uploads
+
+      - name: Seed admin user
+        working-directory: backend
+        env:
+          MONGO_URI: ${{ env.MONGO_URI }}
+        run: node scripts/createAdmin.js
+
+      - name: Start backend API
+        working-directory: backend
+        env:
+          MONGO_URI: ${{ env.MONGO_URI }}
+          JWT_SECRET: ${{ env.JWT_SECRET }}
+          PORT: ${{ env.PORT }}
+        run: |
+          nohup node server.js > "$GITHUB_WORKSPACE/backend-ci.log" 2>&1 &
+
+      - name: Wait for API
+        run: |
+          for i in {1..60}; do
+            if curl -sf "http://127.0.0.1:${{ env.PORT }}/api/events" >/dev/null; then
+              echo "API is up"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "Backend log tail:"
+          tail -n 80 "$GITHUB_WORKSPACE/backend-ci.log" || true
+          exit 1
+
+      - name: Register regular test user (new@eventy.com)
+        run: |
+          # 201 OK; 409 if user exists from a flaky retry — both are acceptable
+          reg=$(curl -s -w "\n%{http_code}" -X POST "http://127.0.0.1:${{ env.PORT }}/api/auth/register" \
+            -H "Content-Type: application/json" \
+            -d '{"name":"CI Test User","email":"new@eventy.com","password":"newAcc123"}')
+          echo "$reg"
+          curl -sf -X POST "http://127.0.0.1:${{ env.PORT }}/api/auth/login" \
+            -H "Content-Type: application/json" \
+            -d '{"email":"new@eventy.com","password":"newAcc123"}' | head -c 200
+          echo
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Build frontend for CI
+        working-directory: frontend
+        env:
+          CI: 'true'
+          # Must match PORT above so CRA talks to same API Playwright expects
+          REACT_APP_API_URL: http://127.0.0.1:${{ env.PORT }}
+        run: |
+          rm -f .env .env.local
+          echo "REACT_APP_API_URL=http://127.0.0.1:${{ env.PORT }}" > .env
+          npm run build
+
+      - name: Serve frontend (static build on port 3000)
+        working-directory: frontend
+        run: |
+          nohup npx --yes serve@14 -s build -l 3000 > "$GITHUB_WORKSPACE/frontend-ci.log" 2>&1 &
+
+      - name: Wait for frontend
+        run: |
+          for i in {1..60}; do
+            if curl -sf "http://127.0.0.1:3000" >/dev/null; then
+              echo "Frontend is up"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "Frontend log tail:"
+          tail -n 80 "$GITHUB_WORKSPACE/frontend-ci.log" || true
+          exit 1
+
+      - name: Install Playwright (qa)
+        working-directory: qa
+        run: npm ci
+
+      - name: Install Playwright browsers
+        working-directory: qa
+        run: npx playwright install --with-deps
+
+      # Chromium only keeps CI runtime predictable; uncomment extra projects locally or here when ready.
+      - name: Run Playwright tests
+        working-directory: qa
+        env:
+          CI: 'true'
+        run: npx playwright test --project chromium
+
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: qa/playwright-report/
+          retention-days: 14
+
+      - name: Upload backend log on failure
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: backend-ci-log
+          path: backend-ci.log
+          retention-days: 7
+
+      - name: Upload frontend log on failure
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: frontend-ci-log
+          path: frontend-ci.log
+          retention-days: 7

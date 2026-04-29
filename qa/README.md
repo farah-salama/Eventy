@@ -113,6 +113,12 @@ qa/
 
 ---
 
+## GitHub Actions (CI)
+
+Pushes and pull requests to **`main`** or **`master`** run [.github/workflows/playwright-ci.yml](.github/workflows/playwright-ci.yml): MongoDB, seeded users, backend on port **4000**, production build of the frontend on **3000**, then **`npx playwright test --project chromium`**.
+
+---
+
 ## Related documentation
 
 | Document | Purpose |
